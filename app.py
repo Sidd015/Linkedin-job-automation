@@ -12,12 +12,16 @@ app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)  # Enable CORS for frontend requests
 
 # Configuration
-UPLOAD_FOLDER = 'uploads'
+# Configuration
+# Use /tmp for serverless environments (Vercel), 'uploads' for local
+if os.environ.get('VERCEL') or not os.path.exists('uploads') and not os.access('.', os.W_OK):
+    UPLOAD_FOLDER = '/tmp'
+else:
+    UPLOAD_FOLDER = 'uploads'
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx'}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
-
-# Create upload folder if it doesn't exist
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
